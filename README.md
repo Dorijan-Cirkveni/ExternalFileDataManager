@@ -1,0 +1,2 @@
+# ExternalFileDataManager
+ self-explanatory
