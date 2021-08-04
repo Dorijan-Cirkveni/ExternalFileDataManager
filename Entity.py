@@ -1,7 +1,10 @@
 class Entity:
     def __init__(self, tags):
-        self.tags = tags
+        self.tags: dict = tags
         return
+
+    def raw_display(self):
+        return self.tags.get("name", "Unnamed file???")
 
 
 class Folder(Entity):
@@ -14,6 +17,8 @@ class Folder(Entity):
             self.subfolders = X[0]
             self.files = X[1]
 
+    def raw_display(self):
+        return self.tags.get("name", "Unnamed folder???")
 
 
 def main():
