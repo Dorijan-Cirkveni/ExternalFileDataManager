@@ -1,43 +1,82 @@
 import os
 import re
 from typing import List
-from Entity import Entity
+from Entity import Entity, Folder
+from ProgressTracker import ProgressTracker
+
+
+class Location:
+    def __init__(self, current, trace=None):
+        trace: List[Folder]
+        if trace is None:
+            trace = []
+        self.current: Folder = current
+        self.trace: List[Folder] = trace
+        return
+
+    def print_current(self, filter=3, tags=None):
+        if tags is None:
+            tags = {'size'}
+        if filter & 1 != 0:
+            for e in self.current.files:
+                e: Entity
+                print(e, {f: e.tags[f] for f in tags})
+        if filter & 1 != 0:
+            for e in self.current.files:
+                e: Folder
+                print(e, {f: e.tags[f] for f in tags})
+
+    def outer(self):
+        if len(self.trace)==0:
+            return None
+        ret = self.current
+        self.current = self.trace.pop()
+        return ret
+
+    def inner(self, nxt: Folder):
+        self.trace.append(self.current)
+        self.current = nxt
+        return
+
+    def open_folder(self, name):
+        X = self.current.subfolders
+        if name not in X:
+            raise FileNotFoundError
+        self.inner(X[name])
+        return
 
 
 class Domain:
-    def __init__(self, directory, entityList=None, depthLimit: int = 5):
+    def __init__(self, directory, tracker=None):
         self.directory = directory
-        self.indexCounter = 0
-        self.root = None
-        self.entityList = entityList
-        if entityList is not None:
-            self.rootEntity = entityList[0]
-            return
-        self.entityList = dict()
-        if type(depthLimit) != int:
-            raise Exception("Depth limit must be a non-negative integer for a determined depth limit"
-                            " or a negative integer for a non-existent one.")
-        while depthLimit!=0:
-        X = os.listdir(directory)
-        self.entityList = {e: Entity({"name": e}) for e in X}
-    def import_data(self,filename):
+        self.root = Folder({})
+        self.root.read(directory,tracker)
+        return
 
+    def import_data(self, filename):
+        return
 
-
-    def raw_display(self, filter_crit: callable = None, sort_crit: callable = None, depth=0):
-        if filter_crit is None:
-            filter_crit = lambda e, v: True
-        if sort_crit is None:
-            sort_crit = lambda x: 0
-        L: List[Entity] = [(e, v) for (e, v) in self.entityList.items() if filter_crit(e, v)]
-        L.sort(key=sort_crit)
-        return "\n".join([e[0] for e in L])
+    def raw_display(self, filter_crit: callable = None, sort_crit: callable = None):
+        L = []
+        self.root.raw_display(L)
+        return "\n".join(L)
 
 
 def main():
-    path = "C:\DDLC\my_mods\TMIWNHANDANHHTHTYVM\game"
-    X = Domain(path)
-    print(X.raw_display())
+    path = "C:/Projects"  # "Projects/ExternalFileDataManager/TEST"
+    X = Domain(path, ProgressTracker(0,10**6,1))
+    C = Location(X.root)
+    while True:
+        order=input('>>>').split(' ')
+        if order[0]=='end':
+            break
+        elif order[0]=='return':
+            res=C.outer()
+            print(res)
+        elif order[0]=='open_folder':
+            C.open_folder(order[1])
+        else:
+            pass
     return
 
 
