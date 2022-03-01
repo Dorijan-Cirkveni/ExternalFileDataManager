@@ -76,6 +76,7 @@ def main():
         elif order[0]=='open_folder':
             C.open_folder(order[1])
         else:
+            print('Not a valid command.')
             pass
     return
 
