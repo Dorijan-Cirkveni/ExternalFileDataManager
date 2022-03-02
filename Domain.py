@@ -64,6 +64,7 @@ class Domain:
 
 def main():
     path = "C:/Projects"  # "Projects/ExternalFileDataManager/TEST"
+    # TODO implement subdirectory metadata storage
     X = Domain(path, ProgressTracker(0,10**6,1))
     C = Location(X.root)
     while True:
